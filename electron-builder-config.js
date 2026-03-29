@@ -45,7 +45,7 @@ module.exports = () => {
   return {
     productName: 'KalamSync',
     appId: 'io.luyang.kalamsync',
-    forceCodeSigning: false,
+    forceCodeSigning: true,
     // eslint-disable-next-line no-template-curly-in-string
     artifactName: '${name}-${version}-${os}-${arch}.${ext}',
     copyright: '© Luyang',
@@ -93,7 +93,7 @@ module.exports = () => {
       category: 'public.app-category.productivity',
       entitlements: 'build/entitlements.mas.plist',
       icon: 'build/icon.icns',
-      binaries: ['dist/mas/OpenMTP.app/Contents/Resources/bin/mtp-cli'],
+      binaries: ['dist/mas/KalamSync.app/Contents/Resources/bin/mtp-cli'],
     },
     dmg: {
       contents: [

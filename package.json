@@ -1,7 +1,7 @@
 {
   "name": "kalamsync",
   "productName": "KalamSync",
-  "version": "1.0.0",
+  "version": "3.2.25",
   "description": "KalamSync | Cross-platform Android File Transfer Application",
   "scripts": {
     "build": "yarn lint && concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -44,7 +44,7 @@
   "author": {
     "name": "Luyang",
     "email": "luyang2022@outlook.com",
-    "url": "https://github.com/luyang668899"
+    "url": "https://github.com/luyang668899/"
   },
   "license": "MIT",
   "bugs": {
@@ -55,6 +55,9 @@
     "android",
     "file-transfer",
     "cross-platform",
+    "macOS",
+    "Windows",
+    "Linux",
     "mtp"
   ],
   "homepage": "https://github.com/luyang668899/KalamSync",
