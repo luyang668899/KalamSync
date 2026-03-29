@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install dependencies
+        run: yarn install --ignore-engines
+      - name: Build
+        run: |
+          export NODE_OPTIONS=--openssl-legacy-provider
+          yarn build-no-verify
+      - name: Package
+        run: |
+          export NODE_OPTIONS=--openssl-legacy-provider
+          yarn package-mac-no-verify
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: kalamsync-installer
+          path: dist/*
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: kalamsync-installer
+      - name: Create deployment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const deployments = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              description: 'Deploy KalamSync',
+              auto_merge: false,
+              required_contexts: []
+            });
+            console.log('Deployment created:', deployments.data.id);
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployments.data.id,
+              state: 'success',
+              description: 'Deployment successful',
+              environment_url: 'https://github.com/${{ github.repository }}/releases'
+            });
