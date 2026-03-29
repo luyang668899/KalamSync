@@ -1,8 +1,8 @@
 {
-  "name": "openmtp",
-  "productName": "OpenMTP",
-  "version": "3.2.25",
-  "description": "OpenMTP | Android File Transfer for macOS",
+  "name": "kalamsync",
+  "productName": "KalamSync",
+  "version": "1.0.0",
+  "description": "KalamSync | Cross-platform Android File Transfer Application",
   "scripts": {
     "build": "yarn lint && concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-no-verify": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -39,25 +39,26 @@
   "main": "./app/main.prod.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ganeshrvel/openmtp.git"
+    "url": "git+https://github.com/luyang668899/KalamSync.git"
   },
   "author": {
-    "name": "Ganesh Rathinavel",
-    "email": "ganeshrvel@outlook.com",
-    "url": "https://www.linkedin.com/in/ganeshrvel/"
+    "name": "Luyang",
+    "email": "luyang2022@outlook.com",
+    "url": "https://github.com/luyang668899"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ganeshrvel/openmtp/issues/"
+    "url": "https://github.com/luyang668899/KalamSync/issues/"
   },
   "keywords": [
-    "openmtp",
+    "kalamsync",
     "android",
     "file-transfer",
-    "macOS",
+    "cross-platform",
     "mtp"
   ],
-  "homepage": "https://openmtp.ganeshrvel.com/",
+  "homepage": "https://github.com/luyang668899/KalamSync",
+
   "browserslist": {
     "production": [
       "last 2 Chrome versions"

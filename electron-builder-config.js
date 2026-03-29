@@ -43,20 +43,20 @@ module.exports = () => {
   };
 
   return {
-    productName: 'OpenMTP',
-    appId: 'io.ganeshrvel.openmtp',
-    forceCodeSigning: true,
+    productName: 'KalamSync',
+    appId: 'io.luyang.kalamsync',
+    forceCodeSigning: false,
     // eslint-disable-next-line no-template-curly-in-string
     artifactName: '${name}-${version}-${os}-${arch}.${ext}',
-    copyright: '© Ganesh Rathinavel',
+    copyright: '© Luyang',
     afterPack: './internals/scripts/AfterPack.js',
     afterSign: './internals/scripts/Notarize.js',
     npmRebuild: false,
     publish: [
       {
         provider: 'github',
-        owner: 'ganeshrvel',
-        repo: 'openmtp',
+        owner: 'luyang668899',
+        repo: 'KalamSync',
         private: false,
       },
     ],
