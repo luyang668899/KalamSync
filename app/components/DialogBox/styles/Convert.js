@@ -1,6 +1,6 @@
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 
-export const styles = makeStyles((theme: Theme) =>
+export const styles = makeStyles((theme) =>
   createStyles({
     formControl: {
       margin: theme.spacing(1),
