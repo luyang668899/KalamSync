@@ -83,10 +83,10 @@ class App extends Component {
   };
 
   getMuiTheme = () => {
-    const { appThemeModeSettings } = this.props;
+    const { appThemeModeSettings, appThemeColor, appFontSize, appLayout } = this.props;
     const appThemeMode = getAppThemeMode(appThemeModeSettings);
 
-    return createMuiTheme(materialUiTheme({ appThemeMode }));
+    return createMuiTheme(materialUiTheme({ appThemeMode, appThemeColor, appFontSize, appLayout }));
   };
 
   setFreshInstall() {
@@ -185,6 +185,9 @@ const mapStateToProps = (state) => {
   return {
     appThemeModeSettings: makeAppThemeModeSettings(state),
     appThemeMode: makeAppThemeMode(state),
+    appThemeColor: state.Settings.appThemeColor,
+    appFontSize: state.Settings.appFontSize,
+    appLayout: state.Settings.appLayout,
     mtpDevice: makeMtpDevice(state),
     mtpMode: makeMtpMode(state),
     mtpStoragesList: makeMtpStoragesList(state),

@@ -32,6 +32,10 @@ import { IpcEvents } from './services/ipc-events/IpcEventType';
 import IpcEventService from './services/ipc-events/IpcEventHandler';
 import { isKalamModeSupported } from './helpers/binaries';
 import { fileExistsSync } from './helpers/fileOps';
+import './services/ShortcutsService';
+import './services/CLIService';
+import './services/BackupServiceMain';
+import './services/WirelessServiceMain';
 
 const remote = getRemoteWindow();
 
@@ -39,6 +43,9 @@ const isSingleInstance = app.requestSingleInstanceLock();
 const isDeviceBootable = bootTheDevice();
 const isMas = electronIs.mas();
 let mainWindow = null;
+
+// Expose mainWindow to app object for ShortcutsService
+app.mainWindow = null;
 
 if (IS_PROD) {
   const sourceMapSupport = require('source-map-support');
@@ -143,6 +150,9 @@ async function createWindow() {
       backgroundColor: getWindowBackgroundColor(),
     });
 
+    // Update app.mainWindow reference
+    app.mainWindow = mainWindow;
+
     remote.enable(mainWindow.webContents);
 
     mainWindow?.loadURL(`${PATHS.loadUrlPath}`);
@@ -167,6 +177,7 @@ async function createWindow() {
 
     mainWindow.on('closed', () => {
       mainWindow = null;
+      app.mainWindow = null;
     });
   } catch (e) {
     log.error(e, `main.dev -> createWindow`);

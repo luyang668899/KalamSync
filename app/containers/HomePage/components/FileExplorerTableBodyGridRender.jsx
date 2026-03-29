@@ -21,6 +21,71 @@ class FileExplorerTableBodyGridRender extends PureComponent {
       onContextMenuClick,
     } = this.props;
 
+    // Check if the file is an image
+    const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(item.name);
+    // Check if the file is a video
+    const isVideo = /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(item.name);
+    // Check if the file is a document
+    const isDocument = /\.(pdf|txt|doc|docx|rtf)$/i.test(item.name);
+
+    if (isImage) {
+      return (
+        <div className={styles.fileTypeIconWrapper}>
+          <img
+            src={item.path}
+            alt={item.name}
+            className={classNames(styles.fileTypeIcon, styles.imageThumbnail)}
+            onContextMenu={(event) =>
+              onContextMenuClick(
+                event,
+                { ...item },
+                { ...tableData },
+                _eventTarget
+              )
+            }
+          />
+        </div>
+      );
+    }
+
+    if (isVideo) {
+      return (
+        <div className={styles.fileTypeIconWrapper}>
+          <div className={styles.videoThumbnailWrapper}>
+            <video
+              className={classNames(styles.fileTypeIcon, styles.imageThumbnail)}
+              poster={this.getVideoThumbnail(item.path)}
+              onContextMenu={(event) =>
+                onContextMenuClick(
+                  event,
+                  { ...item },
+                  { ...tableData },
+                  _eventTarget
+                )
+              }
+            >
+              <source src={item.path} type="video/mp4" />
+            </video>
+            <div className={styles.videoPlayIcon}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isDocument) {
+      return (
+        <div className={styles.fileTypeIconWrapper}>
+          <div className={styles.documentThumbnailWrapper}>
+            {this.getDocumentPreview(item)}
+          </div>
+        </div>
+      );
+    }
+
     const fileIcon = prettyFileIcons.getIcon(item.name, 'svg');
 
     return (
@@ -40,6 +105,28 @@ class FileExplorerTableBodyGridRender extends PureComponent {
         />
       </div>
     );
+  };
+
+  getDocumentPreview = (item) => {
+    const { classes: styles } = this.props;
+    
+    // For now, return a placeholder with file type
+    const fileExtension = item.name.split('.').pop().toUpperCase();
+    
+    return (
+      <div className={classNames(styles.fileTypeIcon, styles.documentThumbnail)}>
+        <div className={styles.documentContent}>
+          <div className={styles.documentExtension}>{fileExtension}</div>
+          <div className={styles.documentName}>{item.name.substring(0, 10)}...</div>
+        </div>
+      </div>
+    );
+  };
+
+  getVideoThumbnail = (videoPath) => {
+    // For now, return a placeholder
+    // In a real implementation, we would generate a thumbnail from the video
+    return imgsrc(`file-types/video.svg`);
   };
 
   RenderFolderIcon = () => {

@@ -6,6 +6,9 @@ import {
   faPlug,
   faArrowLeft,
   faQuestionCircle,
+  faBackup,
+  faWifi,
+  faDevices,
 } from '@fortawesome/free-solid-svg-icons';
 import { faGithub, faPaypal } from '@fortawesome/free-brands-svg-icons';
 import { actionTypes } from './actions';
@@ -81,6 +84,11 @@ export const initialState = {
         label: 'Delete',
         icon: faTrashAlt,
       },
+      wireless: {
+        enabled: true,
+        label: 'Wireless Devices',
+        icon: faWifi,
+      },
       gitHub: {
         enabled: true,
         label: 'GitHub',
@@ -112,6 +120,21 @@ export const initialState = {
         enabled: true,
         label: 'Delete',
         icon: faTrashAlt,
+      },
+      backup: {
+        enabled: true,
+        label: 'Backup Device',
+        icon: faBackup,
+      },
+      wireless: {
+        enabled: true,
+        label: 'Wireless Devices',
+        icon: faWifi,
+      },
+      devices: {
+        enabled: true,
+        label: 'MTP Devices',
+        icon: faDevices,
       },
       storage: {
         enabled: true,
@@ -168,17 +191,10 @@ export const initialState = {
     [DEVICE_TYPE.mtp]: DEVICES_DEFAULT_PATH.mtp,
   },
 
-  mtpDevice: {
-    isAvailable: false,
-    error: null,
-    isLoading: false,
-
-    /**
-     * params: {mtpDeviceInfo, usbDeviceInfo} - info
-     *
-     */
-    info: {},
+  mtpDevices: {
+    // 设备 ID 作为键，设备信息作为值
   },
+  activeMtpDeviceId: null,
 
   contextMenuList: {
     [DEVICE_TYPE.local]: {
@@ -336,12 +352,22 @@ export default function Home(state = initialState, action) {
       };
 
     case actionTypes.SET_MTP_STATUS:
+      const deviceId = payload.deviceId || state.activeMtpDeviceId;
       return {
         ...state,
-        mtpDevice: {
-          ...state.mtpDevice,
-          ...payload,
+        mtpDevices: {
+          ...state.mtpDevices,
+          [deviceId]: {
+            ...state.mtpDevices[deviceId],
+            ...payload,
+          },
         },
+      };
+
+    case actionTypes.SET_ACTIVE_MTP_DEVICE:
+      return {
+        ...state,
+        activeMtpDeviceId: payload,
       };
 
     case actionTypes.LIST_DIRECTORY:

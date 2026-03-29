@@ -22,6 +22,7 @@ const actionTypesList = [
   'LIST_DIRECTORY',
   'SET_MTP_ERRORS',
   'SET_MTP_STATUS',
+  'SET_ACTIVE_MTP_DEVICE',
   'CHANGE_MTP_STORAGE',
   'SET_FILE_TRANSFER_CLIPBOARD',
   'SET_FILE_TRANSFER_PROGRESS',
@@ -846,5 +847,12 @@ export function setFilesDrag({ ...data }) {
 export function clearFilesDrag() {
   return {
     type: actionTypes.CLEAR_FILES_DRAG,
+  };
+}
+
+export function setActiveMtpDevice(deviceId) {
+  return {
+    type: actionTypes.SET_ACTIVE_MTP_DEVICE,
+    payload: deviceId,
   };
 }

@@ -3,3 +3,7 @@ export { default as Confirm } from './components/Confirm';
 export { default as TextFieldEdit } from './components/TextFieldEdit';
 export { default as Selection } from './components/Selection';
 export { default as ProgressBar } from './components/ProgressBar';
+export { default as BatchRename } from './components/BatchRename';
+export { default as Compress } from './components/Compress';
+export { default as Extract } from './components/Extract';
+export { default as Convert } from './components/Convert';

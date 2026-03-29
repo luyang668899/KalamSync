@@ -19,6 +19,7 @@ const actionTypesList = [
   'SET_FILES_PREPROCESSING_BEFORE_TRANSFER',
   'COMMON_SETTINGS',
   'COPY_JSON_FILE_TO_SETTINGS',
+  'SET_PERMISSIONS',
 ];
 
 const excludeItemsFromSettingsFile = ['toggleSettings'];
@@ -296,5 +297,23 @@ export function copyJsonFileToSettings({ ...data }) {
     payload: {
       ...data,
     },
+  };
+}
+
+export function setPermissions({ ...data }, getState) {
+  const { permissions } = data;
+
+  return (dispatch) => {
+    dispatch({
+      type: actionTypes.SET_PERMISSIONS,
+      payload: permissions,
+    });
+
+    dispatch(copySettingsToJsonFile(getState));
+
+    analyticsService.sendEvent(EVENT_TYPE.TOOLBAR_SETTINGS_CHANGE, {
+      key: 'permissions',
+      value: permissions,
+    });
   };
 }

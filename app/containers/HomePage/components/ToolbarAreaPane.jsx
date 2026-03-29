@@ -51,6 +51,9 @@ import { checkIf } from '../../../utils/checkIf';
 import { analyticsService } from '../../../services/analytics';
 import { EVENT_TYPE } from '../../../enums/events';
 import { IpcEvents } from '../../../services/ipc-events/IpcEventType';
+import BackupManager from '../../../components/BackupManager';
+import WirelessManager from '../../../components/WirelessManager';
+import MtpDeviceManager from '../../../components/MtpDeviceManager';
 
 class ToolbarAreaPane extends PureComponent {
   constructor(props) {
@@ -60,6 +63,7 @@ class ToolbarAreaPane extends PureComponent {
       toggleDeleteConfirmDialog: false,
       toggleMtpStorageSelectionDialog: false,
       toggleMtpModeSelectionDialog: false,
+      toggleBackupManager: false,
     };
     this.state = {
       ...this.initialState,
@@ -311,6 +315,21 @@ class ToolbarAreaPane extends PureComponent {
 
         break;
 
+      case 'backup':
+        this._handleBackupDevice();
+
+        break;
+
+      case 'wireless':
+        this._handleWirelessDevices();
+
+        break;
+
+      case 'devices':
+        this._handleMtpDevices();
+
+        break;
+
       case 'faqs':
         this._handleFaqsBtn();
 
@@ -362,6 +381,25 @@ class ToolbarAreaPane extends PureComponent {
     analyticsService.sendEvent(EVENT_TYPE.LOCAL_TOOLBAR_FAQS, {});
   };
 
+  _handleBackupDevice = () => {
+    this.setState({ toggleBackupManager: true });
+    analyticsService.sendEvent(EVENT_TYPE.MTP_TOOLBAR_BACKUP_CLICK, {});
+  };
+
+  _handleWirelessDevices = () => {
+    // WirelessManager component is already rendered in the component
+    // For now, we'll just log the action
+    console.log('Wireless devices clicked');
+    // In a real implementation, we would show the WirelessManager dialog
+  };
+
+  _handleMtpDevices = () => {
+    // MtpDeviceManager component is already rendered in the component
+    // For now, we'll just log the action
+    console.log('MTP devices clicked');
+    // In a real implementation, we would show the MtpDeviceManager dialog
+  };
+
   render() {
     const {
       classes: styles,
@@ -379,6 +417,7 @@ class ToolbarAreaPane extends PureComponent {
       toggleDeleteConfirmDialog,
       toggleMtpStorageSelectionDialog,
       toggleMtpModeSelectionDialog,
+      toggleBackupManager,
     } = this.state;
 
     const { isLoaded: isLoadedDirectoryLists } = directoryLists[deviceType];
@@ -408,6 +447,9 @@ class ToolbarAreaPane extends PureComponent {
           onToolbarAction={this._handleToolbarAction}
           {...parentProps}
         />
+        <BackupManager />
+        <WirelessManager />
+        <MtpDeviceManager />
         <div
           className={classNames({
             [styles.focussedFileExplorer]:

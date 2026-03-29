@@ -14,7 +14,9 @@ import {
   selectMtpMode,
   setCommonSettings,
   toggleSettings,
+  setPermissions,
 } from './actions';
+import permissionService from '../../services/PermissionService';
 import { reloadDirList } from '../HomePage/actions';
 import {
   makeCurrentBrowsePath,
@@ -128,6 +130,36 @@ class Settings extends Component {
     );
   };
 
+  _handleAppThemeColorChange = (event, value, deviceType) => {
+    this._handleSetCommonSettingsChange(
+      {
+        key: 'appThemeColor',
+        value,
+      },
+      deviceType
+    );
+  };
+
+  _handleAppFontSizeChange = (event, value, deviceType) => {
+    this._handleSetCommonSettingsChange(
+      {
+        key: 'appFontSize',
+        value,
+      },
+      deviceType
+    );
+  };
+
+  _handleAppLayoutChange = (event, value, deviceType) => {
+    this._handleSetCommonSettingsChange(
+      {
+        key: 'appLayout',
+        value,
+      },
+      deviceType
+    );
+  };
+
   _handleShowLocalPaneChange = (event, value, deviceType) => {
     this._handleSetCommonSettingsChange(
       {
@@ -183,6 +215,35 @@ class Settings extends Component {
     actionCreateSelectMtpMode({ value }, deviceType);
   };
 
+  _handleRequestPermission = async (permissionType) => {
+    const { actionSetPermissions } = this.props;
+
+    let granted = false;
+    switch (permissionType) {
+      case 'desktop':
+      case 'documents':
+      case 'downloads':
+      case 'pictures':
+        granted = await permissionService.requestFileSystemAccess(permissionType);
+        break;
+      case 'fullDiskAccess':
+        granted = await permissionService.requestFullDiskAccess();
+        break;
+      case 'notifications':
+        granted = await permissionService.requestNotificationPermission();
+        break;
+      case 'accessibility':
+        granted = await permissionService.requestAccessibilityPermission();
+        break;
+      default:
+        return;
+    }
+
+    // Update permission status in Redux
+    const updatedPermissions = permissionService.getPermissions();
+    actionSetPermissions({ permissions: updatedPermissions });
+  };
+
   _handleSetCommonSettingsChange = ({ key, value }, deviceType) => {
     const { actionSetCommonSettings } = this.props;
 
@@ -217,6 +278,9 @@ class Settings extends Component {
         onPrereleaseUpdatesChange={this._handlePrereleaseUpdatesChange}
         onStatusBarChange={this._handleStatusBarChange}
         onAppThemeModeChange={this._handleSetAppThemeModeChange}
+        onAppThemeColorChange={this._handleAppThemeColorChange}
+        onAppFontSizeChange={this._handleAppFontSizeChange}
+        onAppLayoutChange={this._handleAppLayoutChange}
         onShowLocalPaneChange={this._handleShowLocalPaneChange}
         onShowLocalPaneOnLeftSideChange={
           this._handleShowLocalPaneOnLeftSideChange
@@ -227,6 +291,7 @@ class Settings extends Component {
         }
         onMtpModeChange={this._handleMtpModeChange}
         onEnableUsbHotplug={this._handleEnableUsbHotplug}
+        onRequestPermission={this._handleRequestPermission}
         {...parentProps}
       />
     );
@@ -297,6 +362,12 @@ const mapDispatchToProps = (dispatch, _) =>
               getState
             )
           );
+        },
+
+      actionSetPermissions:
+        ({ permissions }) =>
+        (_, getState) => {
+          dispatch(setPermissions({ permissions }, getState));
         },
     },
     dispatch

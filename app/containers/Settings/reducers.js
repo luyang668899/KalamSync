@@ -31,6 +31,25 @@ export const initialState = {
     [DEVICE_TYPE.mtp]: FILE_EXPLORER_VIEW_TYPE.grid,
   },
   appThemeMode: APP_THEME_MODE_TYPE.auto,
+  appThemeColor: 'primary', // primary, secondary, teal, purple, orange, green
+  appFontSize: 'medium', // small, medium, large
+  appLayout: 'default', // default, compact, expanded
+  permissions: {
+    fileSystem: {
+      desktop: false,
+      documents: false,
+      downloads: false,
+      pictures: false,
+      fullDiskAccess: false
+    },
+    network: {
+      internet: true
+    },
+    system: {
+      notifications: false,
+      accessibility: false
+    }
+  },
   showLocalPane: true,
   showLocalPaneOnLeftSide: true,
   showDirectoriesFirst: true,
@@ -98,6 +117,12 @@ export default function Settings(state = initialState, action) {
           ...state.filesPreprocessingBeforeTransfer,
           [payload.direction]: payload.value,
         },
+      };
+
+    case actionTypes.SET_PERMISSIONS:
+      return {
+        ...state,
+        permissions: payload,
       };
 
     default:

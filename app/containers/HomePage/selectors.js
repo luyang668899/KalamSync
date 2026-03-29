@@ -2,6 +2,25 @@ import { createSelector } from 'reselect';
 import { initialState } from './reducers';
 import { getSelectedStorageIdFromState } from './actions';
 
+// 确保 initialState 有默认的 mtpDevices 和 activeMtpDeviceId
+if (!initialState.mtpDevices) {
+  initialState.mtpDevices = {};
+}
+
+if (initialState.activeMtpDeviceId === undefined) {
+  initialState.activeMtpDeviceId = null;
+}
+
+// 保持向后兼容
+if (!initialState.mtpDevice) {
+  initialState.mtpDevice = {
+    isAvailable: false,
+    error: null,
+    isLoading: false,
+    info: {},
+  };
+}
+
 const make = (state, __) => (state ? state.Home : {});
 
 export const makeFocussedFileExplorerDeviceType = createSelector(
@@ -28,8 +47,18 @@ export const makeDirectoryLists = createSelector(make, (state) =>
   state ? state.directoryLists : initialState.directoryLists
 );
 
-export const makeMtpDevice = createSelector(make, (state) =>
-  state ? state.mtpDevice : initialState.mtpDevice
+export const makeMtpDevice = createSelector(make, (state) => {
+  if (!state) return initialState.mtpDevice;
+  const deviceId = state.activeMtpDeviceId;
+  return deviceId ? state.mtpDevices[deviceId] : initialState.mtpDevice;
+});
+
+export const makeMtpDevices = createSelector(make, (state) =>
+  state ? state.mtpDevices : initialState.mtpDevices
+);
+
+export const makeActiveMtpDeviceId = createSelector(make, (state) =>
+  state ? state.activeMtpDeviceId : initialState.activeMtpDeviceId
 );
 
 export const makeContextMenuList = createSelector(make, (state) =>

@@ -23,6 +23,10 @@ import {
   TextFieldEdit as TextFieldEditDialog,
   ProgressBar as ProgressBarDialog,
   Confirm as ConfirmDialog,
+  BatchRename as BatchRenameDialog,
+  Compress as CompressDialog,
+  Extract as ExtractDialog,
+  Convert as ConvertDialog,
 } from '../../../components/DialogBox';
 import { withReducer } from '../../../store/reducers/withReducer';
 import reducers from '../reducers';
@@ -88,6 +92,7 @@ import { getMainWindowRendererProcess } from '../../../helpers/windowHelper';
 import { throwAlert } from '../../Alerts/actions';
 import { imgsrc } from '../../../utils/imgsrc';
 import FileExplorerBodyRender from './FileExplorerBodyRender';
+import BookmarkBar from './BookmarkBar';
 import { openExternalUrl } from '../../../utils/url';
 import { APP_GITHUB_URL, APP_NAME } from '../../../constants/meta';
 import {
@@ -183,6 +188,14 @@ class FileExplorer extends Component {
 
     this.initialState = {
       togglePasteConfirmDialog: false,
+      toggleBatchRenameDialog: false,
+      toggleCompressDialog: false,
+      toggleExtractDialog: false,
+      toggleConvertDialog: false,
+      selectedFilesForBatchRename: [],
+      selectedFilesForCompress: [],
+      selectedArchiveForExtract: '',
+      selectedFilesForConvert: [],
       toggleDialog: {
         rename: {
           errors: {
@@ -774,6 +787,13 @@ class FileExplorer extends Component {
 
       case 'rename':
         if (selected.length !== 1) {
+          // If multiple files are selected, open batch rename dialog
+          if (selected.length > 1) {
+            this.setState({
+              toggleBatchRenameDialog: true,
+              selectedFilesForBatchRename: selected,
+            });
+          }
           break;
         }
 
@@ -781,6 +801,39 @@ class FileExplorer extends Component {
           { toggle: true, data: { ..._lastSelectedNode.item } },
           'rename'
         );
+        break;
+
+      case 'compress':
+        if (selected.length < 1) {
+          break;
+        }
+        this.setState({
+          toggleCompressDialog: true,
+          selectedFilesForCompress: selected,
+        });
+        break;
+
+      case 'extract':
+        if (selected.length !== 1) {
+          break;
+        }
+        const selectedFile = _lastSelectedNode.item;
+        if (selectedFile && selectedFile.name && (selectedFile.name.endsWith('.zip') || selectedFile.name.endsWith('.rar') || selectedFile.name.endsWith('.7z'))) {
+          this.setState({
+            toggleExtractDialog: true,
+            selectedArchiveForExtract: selectedFile.path,
+          });
+        }
+        break;
+
+      case 'convert':
+        if (selected.length < 1) {
+          break;
+        }
+        this.setState({
+          toggleConvertDialog: true,
+          selectedFilesForConvert: selected,
+        });
         break;
 
       case 'open':
@@ -1814,6 +1867,185 @@ class FileExplorer extends Component {
     );
   };
 
+  _handleBatchRename = async ({ ...args }) => {
+    const {
+      deviceType,
+      currentBrowsePath,
+      storageId,
+      hideHiddenFiles,
+      directoryLists,
+    } = this.props;
+    const { confirm, pattern, startNumber, numberPadding, renameType, regexPattern, replaceWith } = args;
+    const selectedFilesForBatchRename = directoryLists[deviceType].queue.selected;
+
+    if (!confirm) {
+      this.setState({ toggleBatchRenameDialog: false });
+      return;
+    }
+
+    try {
+      const fileList = selectedFilesForBatchRename.map((filePath, index) => {
+        const fileInfo = path.parse(filePath);
+        let newFilename;
+
+        if (renameType === 'sequential') {
+          const number = startNumber + index;
+          const paddedNumber = number.toString().padStart(numberPadding, '0');
+          newFilename = `${pattern}${paddedNumber}${fileInfo.ext}`;
+        } else if (renameType === 'regex') {
+          const regex = new RegExp(regexPattern, 'g');
+          newFilename = fileInfo.name.replace(regex, replaceWith);
+        }
+
+        return {
+          filePath,
+          newFilename,
+        };
+      });
+
+      const result = await fileExplorerController.batchRenameFiles({
+        deviceType,
+        fileList,
+        storageId,
+      });
+
+      if (result.error) {
+        this.props.actionCreateThrowError({ message: result.error.message || result.error });
+      } else {
+        // Refresh directory listing
+        this._handleListDirectory({
+          path: currentBrowsePath[deviceType],
+          deviceType,
+        });
+      }
+    } catch (e) {
+      log.error(e, 'FileExplorer._handleBatchRename');
+      this.props.actionCreateThrowError({ message: e.message || 'Failed to rename files' });
+    } finally {
+      this.setState({ toggleBatchRenameDialog: false });
+    }
+  };
+
+  _handleCompress = async ({ ...args }) => {
+    const {
+      deviceType,
+      currentBrowsePath,
+      storageId,
+      directoryLists,
+    } = this.props;
+    const { confirm, outputPath } = args;
+    const selectedFilesForCompress = directoryLists[deviceType].queue.selected;
+
+    if (!confirm) {
+      this.setState({ toggleCompressDialog: false });
+      return;
+    }
+
+    try {
+      const result = await fileExplorerController.compressFiles({
+        deviceType,
+        fileList: selectedFilesForCompress,
+        outputPath,
+        storageId,
+      });
+
+      if (result.error) {
+        this.props.actionCreateThrowError({ message: result.error.message || result.error });
+      } else {
+        // Refresh directory listing
+        this._handleListDirectory({
+          path: path.dirname(outputPath),
+          deviceType: DEVICE_TYPE.local,
+        });
+      }
+    } catch (e) {
+      log.error(e, 'FileExplorer._handleCompress');
+      this.props.actionCreateThrowError({ message: e.message || 'Failed to compress files' });
+    } finally {
+      this.setState({ toggleCompressDialog: false });
+    }
+  };
+
+  _handleExtract = async ({ ...args }) => {
+    const {
+      deviceType,
+      currentBrowsePath,
+      storageId,
+    } = this.props;
+    const { confirm, outputPath } = args;
+    const { selectedArchiveForExtract } = this.state;
+
+    if (!confirm) {
+      this.setState({ toggleExtractDialog: false });
+      return;
+    }
+
+    try {
+      const result = await fileExplorerController.extractFiles({
+        deviceType,
+        archivePath: selectedArchiveForExtract,
+        outputPath,
+        storageId,
+      });
+
+      if (result.error) {
+        this.props.actionCreateThrowError({ message: result.error.message || result.error });
+      } else {
+        // Refresh directory listing
+        this._handleListDirectory({
+          path: outputPath,
+          deviceType: DEVICE_TYPE.local,
+        });
+      }
+    } catch (e) {
+      log.error(e, 'FileExplorer._handleExtract');
+      this.props.actionCreateThrowError({ message: e.message || 'Failed to extract files' });
+    } finally {
+      this.setState({ toggleExtractDialog: false });
+    }
+  };
+
+  _handleConvert = async ({ ...args }) => {
+    const {
+      deviceType,
+      currentBrowsePath,
+      storageId,
+      directoryLists,
+    } = this.props;
+    const { confirm, outputFormat, outputPath } = args;
+    const selectedFilesForConvert = directoryLists[deviceType].queue.selected;
+
+    if (!confirm) {
+      this.setState({ toggleConvertDialog: false });
+      return;
+    }
+
+    try {
+      const result = await fileExplorerController.batchConvertFiles({
+        deviceType,
+        fileList: selectedFilesForConvert,
+        outputFormat,
+        outputPath,
+        storageId,
+      });
+
+      if (result.error) {
+        this.props.actionCreateThrowError({ message: result.error.message || result.error });
+      } else {
+        // Refresh directory listing
+        this._handleListDirectory({
+          path: outputPath,
+          deviceType: DEVICE_TYPE.local,
+        });
+      }
+    } catch (e) {
+      log.error(e, 'FileExplorer._handleConvert');
+      this.props.actionCreateThrowError({ message: e.message || 'Failed to convert files' });
+    } finally {
+      this.setState({ toggleConvertDialog: false });
+    }
+  };
+
   _handleRequestSort = (deviceType, property) => {
     const { directoryLists, actionCreateRequestSort } = this.props;
     const orderBy = property;
@@ -1999,6 +2231,7 @@ class FileExplorer extends Component {
       isStatusBarEnabled,
       fileTransferClipboard,
     } = this.props;
+    const selectedFilesForBatchRename = directoryLists[deviceType].queue.selected;
     const { toggleDialog, togglePasteConfirmDialog, directoryGeneratedTime } =
       this.state;
     const { rename, newFolder } = toggleDialog;
@@ -2051,6 +2284,26 @@ class FileExplorer extends Component {
           btnPositiveText="Create"
           btnNegativeText="Cancel"
           errors={newFolder.errors}
+        />
+        <BatchRenameDialog
+          trigger={this.state.toggleBatchRenameDialog}
+          filesCount={selectedFilesForBatchRename.length}
+          onClickHandler={this._handleBatchRename}
+        />
+        <CompressDialog
+          trigger={this.state.toggleCompressDialog}
+          filesCount={selectedFilesForBatchRename.length}
+          onClickHandler={this._handleCompress}
+        />
+        <ExtractDialog
+          trigger={this.state.toggleExtractDialog}
+          archivePath={this.state.selectedArchiveForExtract}
+          onClickHandler={this._handleExtract}
+        />
+        <ConvertDialog
+          trigger={this.state.toggleConvertDialog}
+          filesCount={selectedFilesForBatchRename.length}
+          onClickHandler={this._handleConvert}
         />
         <ProgressBarDialog
           values={fileTransferProgess.values}
@@ -2151,6 +2404,17 @@ class FileExplorer extends Component {
           bodyText="Replace and merge the existing items?"
           trigger={togglePasteConfirmDialog}
           onClickHandler={this._handlePasteConfirm}
+        />
+        <BookmarkBar
+          currentPath={currentBrowsePath[deviceType]}
+          deviceType={deviceType}
+          storageId={this.props.storageId}
+          onNavigate={(path, deviceType, storageId) => {
+            this._handleListDirectory({
+              path,
+              deviceType,
+            });
+          }}
         />
         <FileExplorerBodyRender
           deviceType={deviceType}

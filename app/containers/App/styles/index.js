@@ -13,12 +13,22 @@ export const styles = (theme) => {
   };
 };
 
-export const getColorPalette = () => {
+export const getColorPalette = (appThemeColor = 'primary') => {
   const lightPrimaryColor = '#fff';
-  const lightSecondaryColor = '#007af5';
-
   const darkPrimaryColor = '#242424';
-  const darkSecondaryColor = '#007af5';
+  
+  // Theme color options
+  const secondaryColors = {
+    primary: '#007af5',
+    secondary: '#9c27b0',
+    teal: '#009688',
+    purple: '#673ab7',
+    orange: '#ff9800',
+    green: '#4caf50'
+  };
+
+  const lightSecondaryColor = secondaryColors[appThemeColor];
+  const darkSecondaryColor = secondaryColors[appThemeColor];
 
   const snackbarError = `#f33950`;
 
@@ -45,7 +55,7 @@ export const getColorPalette = () => {
         tableHeaderFooterBgColor: `#fbfbfb`,
         lightText1Color: `rgba(0, 0, 0, 0.50)`,
         fileExplorerThinLineDividerColor: `rgba(0, 0, 0, 0.12)`,
-        fileDrop: `rgba(0, 122, 245, 0.08)`,
+        fileDrop: `${lightSecondaryColor}33`,
         disabledBgColor: `#f3f3f3`,
         nativeSystemColor: `#ececec`,
         contrastPrimaryMainColor: darkPrimaryColor,
@@ -86,7 +96,7 @@ export const getColorPalette = () => {
         tableHeaderFooterBgColor: `#313131`,
         lightText1Color: `rgba(255, 255, 255, 0.50)`,
         fileExplorerThinLineDividerColor: `rgba(255, 255, 255, .12)`,
-        fileDrop: `rgba(0, 122, 245, 0.08)`,
+        fileDrop: `${darkSecondaryColor}33`,
         disabledBgColor: `rgba(255, 255, 255, 0.15)`,
         nativeSystemColor: `#323232`,
         contrastPrimaryMainColor: lightPrimaryColor,
@@ -95,14 +105,21 @@ export const getColorPalette = () => {
   };
 };
 
-export const getCurrentThemePalette = (appThemeMode) => {
-  return getColorPalette()[appThemeMode];
+export const getCurrentThemePalette = (appThemeMode, appThemeColor) => {
+  return getColorPalette(appThemeColor)[appThemeMode];
 };
 
 export const materialUiTheme = ({ ...args }) => {
-  const { appThemeMode } = args;
+  const { appThemeMode, appThemeColor = 'primary', appFontSize = 'medium', appLayout = 'default' } = args;
 
-  const palette = getCurrentThemePalette(appThemeMode);
+  const palette = getCurrentThemePalette(appThemeMode, appThemeColor);
+
+  // Font size options
+  const fontSizeMap = {
+    small: 12,
+    medium: 14,
+    large: 16
+  };
 
   return {
     palette: {
@@ -110,7 +127,7 @@ export const materialUiTheme = ({ ...args }) => {
     },
     typography: {
       useNextVariants: true,
-      fontSize: variables().sizes.regularFontSize,
+      fontSize: fontSizeMap[appFontSize],
       fontFamily: [
         'Roboto',
         '-apple-system',
@@ -133,6 +150,13 @@ export const materialUiTheme = ({ ...args }) => {
             '--app-secondary-main-color': palette.secondary.main,
             '--app-native-system-color': palette.nativeSystemColor,
             ...commonThemes.noselect,
+          },
+          // Layout-specific styles
+          '.app-layout-compact': {
+            '--app-spacing': '4px',
+          },
+          '.app-layout-expanded': {
+            '--app-spacing': '16px',
           },
         },
       },

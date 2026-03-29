@@ -18,6 +18,9 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { DEVICES_LABEL } from '../../../constants';
 import SettingsDialogTabContainer from './SettingsDialogTabContainer';
+import AuditLogViewer from '../../../components/AuditLogViewer';
+import ShortcutsManager from '../../../components/ShortcutsManager';
+import CLIManager from '../../../components/CLIManager';
 import {
   DEVICE_TYPE,
   FILE_EXPLORER_VIEW_TYPE,
@@ -37,6 +40,9 @@ export default class SettingsDialog extends PureComponent {
 
     this.state = {
       tabIndex: 0,
+      auditLogViewerOpen: false,
+      shortcutsManagerOpen: false,
+      cliManagerOpen: false,
     };
 
     this.isMasHidePosition = 1;
@@ -46,6 +52,30 @@ export default class SettingsDialog extends PureComponent {
     this.setState({
       tabIndex: index,
     });
+  };
+
+  _handleAuditLogViewerOpen = () => {
+    this.setState({ auditLogViewerOpen: true });
+  };
+
+  _handleAuditLogViewerClose = () => {
+    this.setState({ auditLogViewerOpen: false });
+  };
+
+  _handleShortcutsManagerOpen = () => {
+    this.setState({ shortcutsManagerOpen: true });
+  };
+
+  _handleShortcutsManagerClose = () => {
+    this.setState({ shortcutsManagerOpen: false });
+  };
+
+  _handleCLIManagerOpen = () => {
+    this.setState({ cliManagerOpen: true });
+  };
+
+  _handleCLIManagerClose = () => {
+    this.setState({ cliManagerOpen: false });
   };
 
   shoudThisTabHeadRender = (position) => {
@@ -71,6 +101,9 @@ export default class SettingsDialog extends PureComponent {
       hideHiddenFiles,
       fileExplorerListingType,
       appThemeMode,
+      appThemeColor,
+      appFontSize,
+      appLayout,
       styles,
       enableAutoUpdateCheck,
       enableBackgroundAutoUpdate,
@@ -82,6 +115,7 @@ export default class SettingsDialog extends PureComponent {
       showDirectoriesFirst,
       mtpMode,
       filesPreprocessingBeforeTransfer,
+      permissions,
       onAnalyticsChange,
       onHiddenFilesChange,
       onFileExplorerListingType,
@@ -91,12 +125,16 @@ export default class SettingsDialog extends PureComponent {
       onPrereleaseUpdatesChange,
       onStatusBarChange,
       onAppThemeModeChange,
+      onAppThemeColorChange,
+      onAppFontSizeChange,
+      onAppLayoutChange,
       onShowLocalPaneChange,
       onShowLocalPaneOnLeftSideChange,
       onShowDirectoriesFirstChange,
       onMtpModeChange,
       onFilesPreprocessingBeforeTransferChange,
       onEnableUsbHotplug,
+      onRequestPermission,
       enableUsbHotplug,
     } = this.props;
 
@@ -151,6 +189,18 @@ export default class SettingsDialog extends PureComponent {
             {this.shoudThisTabHeadRender(3) && (
               <Tab label="Privacy" className={styles.tab} />
             )}
+            {this.shoudThisTabHeadRender(4) && (
+              <Tab label="Permissions" className={styles.tab} />
+            )}
+            {this.shoudThisTabHeadRender(5) && (
+              <Tab label="Audit Logs" className={styles.tab} />
+            )}
+            {this.shoudThisTabHeadRender(6) && (
+              <Tab label="Shortcuts" className={styles.tab} />
+            )}
+            {this.shoudThisTabHeadRender(7) && (
+              <Tab label="CLI" className={styles.tab} />
+            )}
           </Tabs>
 
           {/* ----- General Tab ----- */}
@@ -182,6 +232,99 @@ export default class SettingsDialog extends PureComponent {
                         value={APP_THEME_MODE_TYPE.auto}
                         control={<Radio />}
                         label="Auto"
+                      />
+                    </RadioGroup>
+
+                    <Typography variant="subtitle2" className={`${styles.subtitle} ${styles.fmSettingsStylesFix}`}>
+                      Theme Color
+                    </Typography>
+                    <RadioGroup
+                      aria-label="app-theme-color"
+                      name="app-theme-color"
+                      value={appThemeColor}
+                      onChange={(e, value) => onAppThemeColorChange(e, value)}
+                    >
+                      <FormControlLabel
+                        value="primary"
+                        control={<Radio />}
+                        label="Primary (Blue)"
+                      />
+                      <FormControlLabel
+                        value="secondary"
+                        control={<Radio />}
+                        label="Secondary (Pink)"
+                      />
+                      <FormControlLabel
+                        value="teal"
+                        control={<Radio />}
+                        label="Teal"
+                      />
+                      <FormControlLabel
+                        value="purple"
+                        control={<Radio />}
+                        label="Purple"
+                      />
+                      <FormControlLabel
+                        value="orange"
+                        control={<Radio />}
+                        label="Orange"
+                      />
+                      <FormControlLabel
+                        value="green"
+                        control={<Radio />}
+                        label="Green"
+                      />
+                    </RadioGroup>
+
+                    <Typography variant="subtitle2" className={`${styles.subtitle} ${styles.fmSettingsStylesFix}`}>
+                      Font Size
+                    </Typography>
+                    <RadioGroup
+                      aria-label="app-font-size"
+                      name="app-font-size"
+                      value={appFontSize}
+                      onChange={(e, value) => onAppFontSizeChange(e, value)}
+                    >
+                      <FormControlLabel
+                        value="small"
+                        control={<Radio />}
+                        label="Small"
+                      />
+                      <FormControlLabel
+                        value="medium"
+                        control={<Radio />}
+                        label="Medium"
+                      />
+                      <FormControlLabel
+                        value="large"
+                        control={<Radio />}
+                        label="Large"
+                      />
+                    </RadioGroup>
+
+                    <Typography variant="subtitle2" className={`${styles.subtitle} ${styles.fmSettingsStylesFix}`}>
+                      Interface Layout
+                    </Typography>
+                    <RadioGroup
+                      aria-label="app-layout"
+                      name="app-layout"
+                      value={appLayout}
+                      onChange={(e, value) => onAppLayoutChange(e, value)}
+                    >
+                      <FormControlLabel
+                        value="default"
+                        control={<Radio />}
+                        label="Default"
+                      />
+                      <FormControlLabel
+                        value="compact"
+                        control={<Radio />}
+                        label="Compact"
+                      />
+                      <FormControlLabel
+                        value="expanded"
+                        control={<Radio />}
+                        label="Expanded"
                       />
                     </RadioGroup>
 
@@ -614,6 +757,212 @@ export default class SettingsDialog extends PureComponent {
                 </div>
               </SettingsDialogTabContainer>
             )}
+
+            {/* ----- Permissions Tab ----- */}
+
+            {tabIndex === this.tabBodyRenderTabIndex(4) && (
+              <SettingsDialogTabContainer>
+                <div className={styles.tabContainer}>
+                  <FormGroup>
+                    <Typography variant="subtitle2" className={styles.subtitle}>
+                      File System Access
+                    </Typography>
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('desktop')}
+                        >
+                          Request Desktop Access
+                        </Button>
+                      }
+                      label={`Desktop: ${permissions?.fileSystem?.desktop ? 'Granted' : 'Not Granted'}`}
+                    />
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('documents')}
+                        >
+                          Request Documents Access
+                        </Button>
+                      }
+                      label={`Documents: ${permissions?.fileSystem?.documents ? 'Granted' : 'Not Granted'}`}
+                    />
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('downloads')}
+                        >
+                          Request Downloads Access
+                        </Button>
+                      }
+                      label={`Downloads: ${permissions?.fileSystem?.downloads ? 'Granted' : 'Not Granted'}`}
+                    />
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('pictures')}
+                        >
+                          Request Pictures Access
+                        </Button>
+                      }
+                      label={`Pictures: ${permissions?.fileSystem?.pictures ? 'Granted' : 'Not Granted'}`}
+                    />
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('fullDiskAccess')}
+                        >
+                          Request Full Disk Access
+                        </Button>
+                      }
+                      label={`Full Disk Access: ${permissions?.fileSystem?.fullDiskAccess ? 'Granted' : 'Not Granted'}`}
+                    />
+                    
+                    <Typography variant="caption">
+                      Note: Full Disk Access requires manual configuration in System Preferences.
+                    </Typography>
+                  </FormGroup>
+                  
+                  <FormGroup className={styles.fmSettingsStylesFix}>
+                    <Typography variant="subtitle2" className={styles.subtitle}>
+                      System Access
+                    </Typography>
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('notifications')}
+                        >
+                          Request Notifications Access
+                        </Button>
+                      }
+                      label={`Notifications: ${permissions?.system?.notifications ? 'Granted' : 'Not Granted'}`}
+                    />
+                    
+                    <FormControlLabel
+                      className={styles.switch}
+                      control={
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onRequestPermission('accessibility')}
+                        >
+                          Request Accessibility Access
+                        </Button>
+                      }
+                      label={`Accessibility: ${permissions?.system?.accessibility ? 'Granted' : 'Not Granted'}`}
+                    />
+                  </FormGroup>
+                </div>
+              </SettingsDialogTabContainer>
+            )}
+
+            {/* ----- Audit Logs Tab ----- */}
+
+            {tabIndex === this.tabBodyRenderTabIndex(5) && (
+              <SettingsDialogTabContainer>
+                <div className={styles.tabContainer}>
+                  <FormGroup>
+                    <Typography variant="subtitle2" className={styles.subtitle}>
+                      Audit Logs
+                    </Typography>
+                    <Typography variant="body2" className={styles.body2}>
+                      View and manage audit logs of file operations.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={this._handleAuditLogViewerOpen}
+                      className={styles.button}
+                    >
+                      View Audit Logs
+                    </Button>
+                    <Typography variant="caption">
+                      Audit logs record all file operations for security and tracking purposes.
+                    </Typography>
+                  </FormGroup>
+                </div>
+              </SettingsDialogTabContainer>
+            )}
+
+            {/* ----- Shortcuts Tab ----- */}
+
+            {tabIndex === this.tabBodyRenderTabIndex(6) && (
+              <SettingsDialogTabContainer>
+                <div className={styles.tabContainer}>
+                  <FormGroup>
+                    <Typography variant="subtitle2" className={styles.subtitle}>
+                      Apple Shortcuts Integration
+                    </Typography>
+                    <Typography variant="body2" className={styles.body2}>
+                      Create custom shortcuts to automate OpenMTP tasks using the Apple Shortcuts app.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={this._handleShortcutsManagerOpen}
+                      className={styles.button}
+                    >
+                      Manage Shortcuts
+                    </Button>
+                    <Typography variant="caption">
+                      Generate URLs that can be used in Apple Shortcuts to trigger OpenMTP actions.
+                    </Typography>
+                  </FormGroup>
+                </div>
+              </SettingsDialogTabContainer>
+            )}
+
+            {/* ----- CLI Tab ----- */}
+
+            {tabIndex === this.tabBodyRenderTabIndex(7) && (
+              <SettingsDialogTabContainer>
+                <div className={styles.tabContainer}>
+                  <FormGroup>
+                    <Typography variant="subtitle2" className={styles.subtitle}>
+                      Command Line Interface
+                    </Typography>
+                    <Typography variant="body2" className={styles.body2}>
+                      Run OpenMTP commands from the command line or directly from the app.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={this._handleCLIManagerOpen}
+                      className={styles.button}
+                    >
+                      Open CLI Manager
+                    </Button>
+                    <Typography variant="caption">
+                      Use commands like `openmtp transfer` to automate file operations from the terminal.
+                    </Typography>
+                  </FormGroup>
+                </div>
+              </SettingsDialogTabContainer>
+            )}
           </FormControl>
 
           <FormControl component="fieldset" className={styles.fieldset} />
@@ -631,6 +980,24 @@ export default class SettingsDialog extends PureComponent {
             Close
           </Button>
         </DialogActions>
+        
+        {/* Audit Log Viewer Dialog */}
+        <AuditLogViewer
+          open={this.state.auditLogViewerOpen}
+          onClose={this._handleAuditLogViewerClose}
+        />
+        
+        {/* Shortcuts Manager Dialog */}
+        <ShortcutsManager
+          open={this.state.shortcutsManagerOpen}
+          onClose={this._handleShortcutsManagerClose}
+        />
+        
+        {/* CLI Manager Dialog */}
+        <CLIManager
+          open={this.state.cliManagerOpen}
+          onClose={this._handleCLIManagerClose}
+        />
       </Dialog>
     );
   }
